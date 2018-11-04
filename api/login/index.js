@@ -4,8 +4,6 @@ const AuthController = require('../../middlewares/auth');
 const passport = require('passport');
 
 router.post('/', AuthController.authenticateUser);
-router.get('/profile', passport.authenticate('jwt', { session: false }), (req, res) => {
-  res.status(200).send(req.user);
-});
+router.get('/users', passport.authenticate('jwt', { session: false }), AuthController.getUsers);
 
 module.exports = router;

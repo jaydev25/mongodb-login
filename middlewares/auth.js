@@ -14,28 +14,10 @@ bcrypt = require('bcrypt-nodejs');
 //     salt = bcrypt.genSaltSync(saltRounds);
 // }
 const crypto = require('crypto-random-string');
-const mongoose = require('mongoose');
-try {
-  mongoose.connect(config.dbURI);
-} catch (e) {
-  console.log(e);
-}
-const sendVerificationEmail = require('../api/sendverificationmail/controller');
 const Joi = require('joi');
 // The authentication controller.
 var AuthController = {};
-const userSchema = new mongoose.Schema({
-    email: String,
-    firstName: String,
-    lastName: String,
-    contact: String,
-    password: String,
-    createdBy: String,
-    updatedBy: String,
-    createdAt: String,
-    updatedAt: String
-});
-const userModel = mongoose.model('testuser', userSchema);
+const userModel = require('../storage/models/users').userModel;
 
 // Register a user.
 AuthController.signUp = function(req, res) {
@@ -93,7 +75,7 @@ AuthController.signUp = function(req, res) {
                   });
                 });
               }
-            })
+            });
         }
     });  // err === null -> valid
 }
@@ -158,6 +140,25 @@ AuthController.authenticateUser = function(req, res) {
             })
         }
     });
+}
+
+AuthController.getUsers = function(req, res) {
+  return userModel.find(function (err, users) {
+    if (err) return console.error(err);
+    if (users) {
+      console.log(users);
+      return res.json({
+          success: true,
+          users: users,
+          currentUser: req.user
+      });
+    } else {
+      return res.status(200).json({
+          success: false,
+          message: 'Failed'
+      });
+    }
+  });
 }
 
 module.exports = AuthController;
